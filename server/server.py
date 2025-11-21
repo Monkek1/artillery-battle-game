@@ -2,6 +2,7 @@ import socket
 import threading
 import pickle #сериализация и десереализация сообщений
 import server.gamelogic
+import random
 
 #адрес и порт на котором слушаются подключения
 HOST = "127.0.0.1"
