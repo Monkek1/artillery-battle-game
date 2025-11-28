@@ -275,11 +275,57 @@ class ClientApp:
 
         #если игрок = текущий игрок то рисуем траекторию выстрела
         if self.current_player_id == self.player_id:
-            self.draw_trajectory_preview()
+            self.draw_trajectory_preview(float(self.entry_angle.get()), float(self.entry_power.get()))
 
     #TODO: траектория выстрелов
-    def draw_trajectory_preview(self):
-        pass
+    def draw_trajectory_preview(self, angle, power):
+        #берем код из simulate_shot с файла сервера
+        angle_rad = math.radians(angle)
+        vx = power * math.cos(angle_rad)
+        vy = -power * math.sin(angle_rad)
+
+        player = self.players[self.player_id]
+
+        x = player["x"]
+        y = player["y"]
+
+        g = 9.8 * 5
+        dt = 0.1
+        cols = len(self.map_heights)
+
+        max_len = 200
+        drawn_len = 0
+        points = [(x, y)]
+
+        while drawn_len < max_len and 0 <= x < self.map_width and 0 <= y < self.map_height:
+            x += vx * dt
+            vy += g * dt
+            y += vy * dt
+
+            col = int(x / self.map_width * (cols - 1))
+            ground_y = self.map_height - self.map_heights[col]
+            if y >= ground_y:
+                y = ground_y
+                points.append((x, y))
+                break
+
+            last_x, last_y = points[-1]
+            step_len = math.hypot(x - last_x, y - last_y)
+            if drawn_len + step_len > max_len:
+                # обрезаем сегмент так, чтобы суммарно было ровно max_len
+                ratio = (max_len - drawn_len) / step_len
+                x = last_x + (x - last_x) * ratio
+                y = last_y + (y - last_y) * ratio
+                points.append((x, y))
+                break
+            else:
+                drawn_len += step_len
+                points.append((x, y))
+
+        if len(points) >= 2:
+            flat = [coord for pt in points for coord in pt]
+            self.canvas.create_line(*flat, fill="orange", width=2, dash=(3, 2))    
+
 
     #создание окна с результатами
     def build_result_frame(self):

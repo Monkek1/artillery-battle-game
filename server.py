@@ -117,8 +117,8 @@ class Room:
         Col = индекс столбца в списке высот.
         '''
         cols = 80
-        #высота от 80 до 200 примерно чтобы смотрелось нормально на экране
-        self.heights = [random.randint(80, 200) for _ in range(cols)]
+
+        self.heights = [random.randint(180, 200) for _ in range(cols)]
         #шаг черех который ставим игроков
         step = self.map_width // (len(self.players) + 1)
         #ставим игроков на карте
